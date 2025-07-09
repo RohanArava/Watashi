@@ -1,7 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using Watashi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<WatashiDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("WatashiDbConnection"))
+);
 
 var app = builder.Build();
 

@@ -1,0 +1,34 @@
+@model Watashi.ViewModels.RecoverySuccessViewModel
+@{
+    ViewData["Title"] = "Recovery Successful";
+}
+
+<h2>Recovery Successful</h2>
+
+<p>Your identity has been verified using a recovery code.</p>
+
+@if (Model.NewRecoveryCodes?.Any() == true)
+{
+    <h3>New Recovery Codes</h3>
+    <p>Your old recovery codes were used up. Here is a new set.</p>
+    <pre id="recoveryCodes">
+@string.Join("\n", Model.NewRecoveryCodes)
+    </pre>
+
+    <button type="button" onclick="copyRecoveryCodes()">Copy Codes</button>
+}
+
+<a href="/login">Continue to Login</a>
+
+@section Scripts {
+    <script>
+        function copyRecoveryCodes() {
+            const codes = document.getElementById("recoveryCodes").innerText;
+            navigator.clipboard.writeText(codes).then(() => {
+                alert("Recovery codes copied to clipboard.");
+            }).catch(err => {
+                alert("Failed to copy: " + err);
+            });
+        }
+    </script>
+}

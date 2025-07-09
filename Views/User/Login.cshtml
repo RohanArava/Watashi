@@ -1,0 +1,28 @@
+@model Watashi.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h2>Login</h2>
+
+<form method="post">
+    <div>
+        <label asp-for="Username"></label>
+        <input asp-for="Username" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Code">TOTP</label>
+        <input asp-for="Code" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Log In</button>
+</form>
+
+<p><a href="/recover">Lost access? Use recovery code</a></p>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,42 @@
+@model Watashi.ViewModels.SignupSuccessViewModel
+@{
+    ViewData["Title"] = "Sign Up Complete";
+}
+
+<h2>Account Created</h2>
+
+<p><strong>Username:</strong> @Model.Username</p>
+
+<h3>Scan this QR code in your TOTP app:</h3>
+@if (!string.IsNullOrEmpty(Model.QrCodeImageUrl))
+{
+    <img src="@Model.QrCodeImageUrl" alt="TOTP QR Code" />
+}
+
+<p><strong>Or use this secret key manually:</strong> @Model.TotpSecret</p>
+
+<h3>Recovery Codes</h3>
+<p>Each code can be used once to recover login access if TOTP fails.</p>
+
+<pre id="recoveryCodes">
+@string.Join("\n", Model.RecoveryCodes)
+</pre>
+
+<button type="button" onclick="copyRecoveryCodes()">Copy Codes</button>
+
+@section Scripts {
+    <script>
+        function copyRecoveryCodes() {
+            const codes = document.getElementById("recoveryCodes").innerText;
+            navigator.clipboard.writeText(codes).then(() => {
+                alert("Recovery codes copied to clipboard.");
+            }).catch(err => {
+                alert("Failed to copy: " + err);
+            });
+        }
+    </script>
+}
+
+<p><strong>Important:</strong> Save these codes securely. You won't see them again.</p>
+
+<a href="/login">Go to Login</a>

@@ -1,0 +1,28 @@
+@model Watashi.ViewModels.RecoverViewModel
+@{
+    ViewData["Title"] = "Account Recovery";
+}
+
+<h2>Account Recovery</h2>
+
+<form method="post">
+    <div>
+        <label asp-for="Username"></label>
+        <input asp-for="Username" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Code"></label>
+        <input asp-for="Code" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Recover Account</button>
+</form>
+
+<p><a href="/login">Back to Login</a></p>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
