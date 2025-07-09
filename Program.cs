@@ -10,6 +10,20 @@ builder.Services.AddDbContext<WatashiDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("WatashiDbConnection"))
 );
 
+builder
+    .Services.AddAuthentication("WatashiCookie")
+    .AddCookie(
+        "WatashiCookie",
+        options =>
+        {
+            options.LoginPath = "/login";
+            options.LogoutPath = "/logout";
+            options.Cookie.Name = "Watashi.Auth";
+        }
+    );
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,7 +41,7 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
+app.MapControllerRoute(name: "default", pattern: "{controller=User}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.Run();

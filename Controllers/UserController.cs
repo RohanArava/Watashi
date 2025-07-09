@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
@@ -12,6 +15,29 @@ namespace Watashi.Controllers;
 public class UserController(WatashiDbContext db) : Controller
 {
     private readonly WatashiDbContext _db = db;
+
+    [Authorize]
+    [HttpGet("/")]
+    public IActionResult Index()
+    {
+        var username = HttpContext.User.Identity?.Name;
+        var displayName = HttpContext.User.FindFirst("DisplayName")?.Value;
+
+        var vm = new DashboardViewModel
+        {
+            Username = username ?? "Unknown",
+            DisplayName = displayName ?? "User"
+        };
+
+        return View("Index", vm);
+    }
+
+    [HttpPost("/logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync("WatashiCookie");
+        return RedirectToAction("Login", "User");
+    }
 
     [HttpGet("/signup")]
     public IActionResult Signup() => View();
@@ -78,7 +104,14 @@ public class UserController(WatashiDbContext db) : Controller
     }
 
     [HttpGet("/login")]
-    public IActionResult Login() => View();
+    public IActionResult Login()
+    {
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "User");
+        }
+        return View();
+    }
 
     [HttpPost("/login")]
     public async Task<IActionResult> Login(LoginViewModel model)
@@ -99,6 +132,18 @@ public class UserController(WatashiDbContext db) : Controller
 
         if (totp.VerifyTotp(code, out _, new VerificationWindow(2, 2)))
         {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.Username),
+                new("DisplayName", user.DisplayName ?? "")
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, "WatashiCookie");
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            await HttpContext.SignInAsync("WatashiCookie", claimsPrincipal);
+
             return View("LoginSuccess", user);
         }
 
@@ -166,6 +211,19 @@ public class UserController(WatashiDbContext db) : Controller
         }
 
         await _db.SaveChangesAsync();
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Username),
+            new("DisplayName", user.DisplayName ?? "")
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, "WatashiCookie");
+        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+        await HttpContext.SignInAsync("WatashiCookie", claimsPrincipal);
+
         return View("LoginSuccess", user);
     }
 }

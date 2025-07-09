@@ -1,0 +1,12 @@
+@model Watashi.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>Welcome, @Model.DisplayName (@Model.Username)</h2>
+
+<p>You are logged in via TOTP authentication.</p>
+
+<form method="post" action="/logout">
+    <button type="submit">Logout</button>
+</form>
