@@ -106,15 +106,17 @@ public class UserController(WatashiDbContext db) : Controller
     [HttpGet("/login")]
     public IActionResult Login()
     {
+        var returnUrl = TempData["ReturnUrl"] ?? "/";
         if (HttpContext.User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "User");
+            return Redirect(returnUrl.ToString() ?? "/");
         }
+        ViewData["ReturnUrl"] = returnUrl;
         return View();
     }
 
     [HttpPost("/login")]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = "/")
     {
         if (!ModelState.IsValid)
             return View(model);
@@ -144,7 +146,7 @@ public class UserController(WatashiDbContext db) : Controller
 
             await HttpContext.SignInAsync("WatashiCookie", claimsPrincipal);
 
-            return View("LoginSuccess", user);
+            return Redirect(returnUrl);
         }
 
         ModelState.AddModelError("Code", "Invalid TOTP.");
@@ -184,6 +186,18 @@ public class UserController(WatashiDbContext db) : Controller
 
         recoveryCode.IsUsed = true;
 
+        string issuer = "Watashi";
+        string otpUri =
+            $"otpauth://totp/{Uri.EscapeDataString(issuer)}:{Uri.EscapeDataString(user.Username)}"
+            + $"?secret={user.TotpSecret}&issuer={Uri.EscapeDataString(issuer)}&algorithm=SHA1&digits=6&period=30";
+
+        using var qrGenerator = new QRCodeGenerator();
+        using var qrData = qrGenerator.CreateQrCode(otpUri, QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(qrData);
+        var qrCodeBytes = qrCode.GetGraphic(20);
+        string qrCodeBase64 = Convert.ToBase64String(qrCodeBytes);
+        string qrCodeImageUrl = $"data:image/png;base64,{qrCodeBase64}";
+
         if (user.RecoveryCodes.All(rc => rc.IsUsed))
         {
             var newCodes = Enumerable
@@ -196,7 +210,8 @@ public class UserController(WatashiDbContext db) : Controller
                 })
                 .ToList();
 
-            user.RecoveryCodes = newCodes;
+            _db.RecoveryCodes.RemoveRange(user.RecoveryCodes);
+            _db.RecoveryCodes.AddRange(newCodes);
 
             await _db.SaveChangesAsync();
 
@@ -205,7 +220,9 @@ public class UserController(WatashiDbContext db) : Controller
                 new RecoverySuccessViewModel
                 {
                     Username = user.Username,
-                    NewRecoveryCodes = newCodes.Select(rc => rc.Code).ToList()
+                    NewRecoveryCodes = [.. newCodes.Select(rc => rc.Code)],
+                    TotpSecret = user.TotpSecret,
+                    QrCodeImageUrl = qrCodeImageUrl
                 }
             );
         }
@@ -224,6 +241,14 @@ public class UserController(WatashiDbContext db) : Controller
 
         await HttpContext.SignInAsync("WatashiCookie", claimsPrincipal);
 
-        return View("LoginSuccess", user);
+        return View(
+            "RecoverySuccess",
+            new RecoverySuccessViewModel
+            {
+                Username = user.Username,
+                TotpSecret = user.TotpSecret,
+                QrCodeImageUrl = qrCodeImageUrl,
+            }
+        );
     }
 }

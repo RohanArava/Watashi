@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Watashi.Data;
+using Watashi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<WatashiDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("WatashiDbConnection"))
 );
+
+builder.Services.AddSingleton<RsaKeyService>();
 
 builder
     .Services.AddAuthentication("WatashiCookie")

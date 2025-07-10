@@ -15,6 +15,9 @@ public class WatashiDbContext(DbContextOptions<WatashiDbContext> options) : DbCo
     public DbSet<User> Users { get; set; }
     public DbSet<RecoveryCode> RecoveryCodes { get; set; }
 
+    public DbSet<AuthorizationCode> AuthorizationCodes { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

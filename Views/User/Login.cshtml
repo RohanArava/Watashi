@@ -17,6 +17,7 @@
         <input asp-for="Code" />
         <span asp-validation-for="Code" class="text-danger"></span>
     </div>
+    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
     <button type="submit">Log In</button>
 </form>

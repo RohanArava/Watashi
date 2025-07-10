@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Watashi.Data;
@@ -11,9 +12,11 @@ using Watashi.Data;
 namespace Watashi.Migrations
 {
     [DbContext(typeof(WatashiDbContext))]
-    partial class WatashiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250710084019_Nonce")]
+    partial class Nonce
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -18,7 +18,15 @@
     <button type="button" onclick="copyRecoveryCodes()">Copy Codes</button>
 }
 
-<a href="/login">Continue to Login</a>
+<h3>Scan this QR code in your TOTP app:</h3>
+@if (!string.IsNullOrEmpty(Model.QrCodeImageUrl))
+{
+    <img src="@Model.QrCodeImageUrl" alt="TOTP QR Code" />
+}
+
+<p><strong>Or use this secret key manually:</strong> @Model.TotpSecret</p>
+
+<a href="/login">Continue</a>
 
 @section Scripts {
     <script>

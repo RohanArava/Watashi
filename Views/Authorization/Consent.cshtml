@@ -1,0 +1,20 @@
+@model Watashi.ViewModels.ConsentViewModel
+
+@{
+    ViewData["Title"] = "Consent";
+}
+
+<h2>Authorize Application</h2>
+<p><strong>@Model.ClientName</strong> is requesting access to your account.</p>
+<p>Requested scope: <code>@Model.Scope</code></p>
+
+<form method="post">
+    <input type="hidden" name="ClientId" value="@Model.ClientId" />
+    <input type="hidden" name="ClientName" value="@Model.ClientName" />
+    <input type="hidden" name="RedirectUri" value="@Model.RedirectUri" />
+    <input type="hidden" name="Scope" value="@Model.Scope" />
+    <input type="hidden" name="State" value="@Model.State" />
+    
+    <button type="submit">Approve</button>
+    <a href="@Model.RedirectUri">Cancel</a>
+</form>
